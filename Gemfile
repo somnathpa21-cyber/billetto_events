@@ -66,3 +66,5 @@ group :test do
 end
 
 gem "rspec-rails", "~> 8.1", groups: [:development, :test]
+
+gem "rails_event_store", "~> 3.2"
