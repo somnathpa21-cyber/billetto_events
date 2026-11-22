@@ -68,3 +68,14 @@ end
 gem "rspec-rails", "~> 8.1", groups: [:development, :test]
 
 gem "rails_event_store", "~> 3.2"
+
+
+gem "webmock", "~> 3.38", group: :test
+
+gem "rest-client", "~> 2.1"
+
+gem "clerk-sdk-ruby", require: "clerk"
+
+gem "sidekiq", "~> 8.1"
+
+gem "sidekiq-cron", "~> 2.4"

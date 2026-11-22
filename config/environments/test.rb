@@ -2,6 +2,16 @@
 # test suite. You never need to work with it otherwise. Remember that
 # your test database is "scratch space" for the test suite and is wiped
 # and recreated between test runs. Don't rely on the data there!
+class TestClerkMiddleware
+  def initialize(app)
+    @app = app
+  end
+
+  def call(env)
+    env["clerk"] = Clerk::Proxy.new
+    @app.call(env)
+  end
+end
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -50,4 +60,6 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+  config.middleware.delete Clerk::Rack::Middleware
+  config.middleware.use TestClerkMiddleware
 end

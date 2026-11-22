@@ -1,0 +1,5 @@
+billetto_import:
+  cron: "0 * * * *"
+  class: "BillettoImportJob"
+  queue: default
+  description: "Synchronize Billetto events every hour"

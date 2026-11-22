@@ -1,0 +1,72 @@
+
+<h1>Upcoming Events</h1>
+
+<% if notice.present? %>
+  <p class="notice"><%= notice %></p>
+<% end %>
+
+<% if @events.any? %>
+  <% @events.each do |event| %>
+    <% likes = @vote_totals[[event.billetto_id, "like"]] || 0 %>
+    <% dislikes = @vote_totals[[event.billetto_id, "dislike"]] || 0 %>
+    <% current_vote = @current_votes[event.billetto_id]&.vote %>
+
+    <article>
+      <% if event.image_url.present? %>
+        <%= image_tag event.image_url,
+                      alt: event.title,
+                      width: 300 %>
+      <% end %>
+
+      <h2><%= event.title %></h2>
+
+      <p>
+        <strong>Date:</strong>
+        <%= event.starts_at.strftime("%d %B %Y, %I:%M %p") %>
+      </p>
+
+      <p>
+        <%= truncate(event.description, length: 200) %>
+      </p>
+
+      <% if event.url.present? %>
+        <%= link_to "View on Billetto",
+                    event.url,
+                    target: "_blank",
+                    rel: "noopener noreferrer" %>
+      <% end %>
+
+      <div class="voting-section">
+        <p>
+          Likes: <strong><%= likes %></strong>
+          |
+          Dislikes: <strong><%= dislikes %></strong>
+        </p>
+
+        <% if clerk_signed_in? %>
+          <%= button_to "Like",
+                        event_like_path(event),
+                        method: :post,
+                        disabled: current_vote == "like" %>
+
+          <%= button_to "Dislike",
+                        event_dislike_path(event),
+                        method: :post,
+                        disabled: current_vote == "dislike" %>
+
+          <% if current_vote.present? %>
+            <p>Your vote: <strong><%= current_vote.capitalize %></strong></p>
+          <% end %>
+        <% else %>
+          <p>
+            <%= link_to "Sign in to vote", clerk.sign_in_url %>
+          </p>
+        <% end %>
+      </div>
+    </article>
+
+    <hr>
+  <% end %>
+<% else %>
+  <p>No upcoming events found.</p>
+<% end %>
