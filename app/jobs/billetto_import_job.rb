@@ -1,7 +1,6 @@
+
 class BillettoImportJob < ApplicationJob
   queue_as :default
-
-  LOCK_KEY = "billetto:import:lock"
 
   retry_on Billetto::Client::Error,
            Billetto::Importer::PaginationError,
@@ -9,31 +8,17 @@ class BillettoImportJob < ApplicationJob
            attempts: 3
 
   def perform
-    lock = RedisLock.new(key: LOCK_KEY)
+    Rails.logger.info("[BillettoImportJob] Starting event import")
 
-    unless lock.acquire
-      Rails.logger.info(
-        "[BillettoImportJob] Another import is already running. Skipping."
-      )
-      return
-    end
+    result = Billetto::Importer.new.import
 
-    begin
-      Rails.logger.info("[BillettoImportJob] Starting event import")
+    Rails.logger.info(
+      "[BillettoImportJob] Import completed. " \
+      "Imported: #{result[:imported_count]}, " \
+      "Skipped: #{result[:skipped_count]}, " \
+      "Total: #{result[:total]}"
+    )
 
-      result = Billetto::Importer.new.import
-
-      Rails.logger.info(
-        "[BillettoImportJob] Import completed. " \
-        "Imported: #{result[:imported_count]}, " \
-        "Skipped: #{result[:skipped_count]}, " \
-        "Total: #{result[:total]}"
-      )
-
-      result
-    ensure
-      lock.release
-      Rails.logger.info("[BillettoImportJob] Import lock released")
-    end
+    result
   end
 end

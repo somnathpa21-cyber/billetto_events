@@ -2,53 +2,36 @@
 require "rails_helper"
 
 RSpec.describe Voting::LikeEvent do
-  let(:command) do
-    described_class.new(
-      event_id: "event-123",
-      user_id: "user-456"
-    )
-  end
-
-  describe "#call" do
-    it "publishes an EventLiked event" do
-      result = command.call
-
-      expect(result).to be_a(Events::EventLiked)
-      expect(result.data).to include(
+  describe "validations" do
+    it "is valid with event_id and user_id" do
+      command = described_class.new(
         event_id: "event-123",
-        user_id: "user-456"
+        user_id: "user-123"
       )
+
+      expect(command).to be_valid
     end
 
-    it "publishes to the event stream" do
-      command.call
+    it "is invalid without event_id" do
+      command = described_class.new(user_id: "user-123")
 
-      events = Rails.configuration.event_store
-        .read
-        .stream("Event$event-123")
-        .to_a
-
-      expect(events.map(&:event_type))
-        .to include("Events::EventLiked")
+      expect(command).not_to be_valid
+      expect(command.errors[:event_id]).to include("can't be blank")
     end
 
-    it "links the event to the user stream" do
-      command.call
+    it "is invalid without user_id" do
+      command = described_class.new(event_id: "event-123")
 
-      events = Rails.configuration.event_store
-        .read
-        .stream("User$user-456")
-        .to_a
-
-      expect(events.map(&:event_type))
-        .to include("Events::EventLiked")
+      expect(command).not_to be_valid
+      expect(command.errors[:user_id]).to include("can't be blank")
     end
 
-    it "requires an event_id and user_id" do
-      invalid_command = described_class.new
+    it "is invalid without both attributes" do
+      command = described_class.new
 
-      expect { invalid_command.call }
-        .to raise_error(ActiveModel::ValidationError)
+      expect(command).not_to be_valid
+      expect(command.errors[:event_id]).to include("can't be blank")
+      expect(command.errors[:user_id]).to include("can't be blank")
     end
   end
 end

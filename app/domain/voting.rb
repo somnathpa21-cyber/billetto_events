@@ -1,13 +1,11 @@
+
 module Voting
   def self.subscriptions
+    projector = VoteProjector.new
+
     [
-      [
-        VoteProjector.new,
-        [
-          Events::EventLiked,
-          Events::EventDisliked
-        ]
-      ]
+      [projector, Events::EventLiked],
+      [projector, Events::EventDisliked]
     ]
   end
 end
